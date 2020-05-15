@@ -121,9 +121,9 @@ namespace PolynomialObject
         /// Gets and sets the coefficient of member with provided degree
         /// If there is no null member for searched degree - return 0 for get and add new member for set
         /// </summary>
-        /// <param name="i">The degree of searched member</param>
+        /// <param name="degree">The degree of searched member</param>
         /// <returns>Coefficient of found member</returns>
-        public double this[double i]
+        public double this[double degree]
         {
             get
             {
@@ -137,7 +137,15 @@ namespace PolynomialObject
             }
         }
 
-
+        /// <summary>
+        /// Convert polynomial to array of included polynomial members 
+        /// </summary>
+        /// <returns>Array with not null polynomial members</returns>
+        public PolynomialMember[] ToArray()
+        {
+            //todo
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Adds two polynomials
