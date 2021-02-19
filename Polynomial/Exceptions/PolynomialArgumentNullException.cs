@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Serialization;
 
 namespace PolynomialObject.Exceptions
 {
@@ -10,5 +11,7 @@ namespace PolynomialObject.Exceptions
         public PolynomialArgumentNullException(string message) : base(message) { }
 
         public PolynomialArgumentNullException(string message, Exception inner) : base(message, inner) { }
+
+        protected PolynomialArgumentNullException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 }
