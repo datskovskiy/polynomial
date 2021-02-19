@@ -5,8 +5,10 @@ namespace PolynomialObject.Exceptions
     [Serializable]
     public class PolynomialArgumentNullException : Exception
     {
-        public PolynomialArgumentNullException() { }
+        public PolynomialArgumentNullException() : base() { }
 
-        public PolynomialArgumentNullException(string message) { }
+        public PolynomialArgumentNullException(string message) : base(message) { }
+
+        public PolynomialArgumentNullException(string message, Exception inner) : base(message, inner) { }
     }
 }
