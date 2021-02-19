@@ -373,8 +373,6 @@ namespace PolynomialTest
 
         #endregion
 
-                // UNCOMMENT TO CHECK ADVANCED PART
-        /*#region advanced
 
         #region Data for Advanced Level
         private static IEnumerable<TestCaseData> AddPolynomialTuplesTestCases
@@ -670,8 +668,6 @@ namespace PolynomialTest
                 message: "AddMember method throw PolynomialArgumentException if there is element with such coefficient. ");
         }
         #endregion
-
-        #endregion*/
 
     }
 

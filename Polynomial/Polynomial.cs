@@ -62,11 +62,10 @@ namespace PolynomialObject
             if (member is null)
                 throw new PolynomialArgumentNullException("Member cant be null.");
 
-            if (_members.Contains(member))
+            if (ContainsMember(member.Degree) || member.Coefficient == 0)
                 throw new PolynomialArgumentException("Member cant be added. Member already exist in polynomial.");
 
-            if (member.Coefficient != 0)
-                _members.Add(member);
+            _members.Add(member);
         }
 
         /// <summary>
