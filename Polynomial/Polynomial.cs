@@ -1,53 +1,43 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using PolynomialObject.Exceptions;
 
 namespace PolynomialObject
 {
     public sealed class Polynomial
     {
-
+        private readonly List<PolynomialMember> _members = new List<PolynomialMember>();
         public Polynomial()
         {
-            //todo
-            throw new NotImplementedException();
         }
 
         public Polynomial(PolynomialMember member)
         {
-            //todo
-            throw new NotImplementedException();
+            if (member.Coefficient != 0)
+                _members.Add(member);
         }
 
         public Polynomial(IEnumerable<PolynomialMember> members)
         {
-            //todo
-            throw new NotImplementedException();
+            _members.AddRange(members.Where(m => m.Coefficient != 0));
         }
 
         public Polynomial((double degree, double coefficient) member)
         {
-            //todo
-            throw new NotImplementedException();
+            if (member.coefficient != 0)
+                _members.Add(new PolynomialMember(member.degree, member.coefficient));
         }
 
         public Polynomial(IEnumerable<(double degree, double coefficient)> members)
         {
-            //todo
-            throw new NotImplementedException();
+            _members.AddRange(members.Select(m => new PolynomialMember(m.degree, m.coefficient)).Where(m => m.Coefficient != 0));
         }
 
         /// <summary>
         /// The amount of not null polynomial members in polynomial 
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                //todo
-                throw new NotImplementedException();
-            }
-        }
+        public int Count => _members.Count(m => m != null);
 
         /// <summary>
         /// The biggest degree of polynomial member in polynomial
@@ -56,8 +46,8 @@ namespace PolynomialObject
         {
             get
             {
-                //todo
-                throw new NotImplementedException();
+                return _members.Where(m => m != null)
+                    .FirstOrDefault(m => m.Degree.Equals(_members.Max(m => m.Degree))).Degree;
             }
         }
 
@@ -69,8 +59,14 @@ namespace PolynomialObject
         /// <exception cref="PolynomialArgumentNullException">Throws when trying to member to add is null</exception>
         public void AddMember(PolynomialMember member)
         {
-            //todo
-            throw new NotImplementedException();
+            if (member is null)
+                throw new PolynomialArgumentNullException("Member cant be null.");
+
+            if (_members.Contains(member))
+                throw new PolynomialArgumentException("Member cant be added. Member already exist in polynomial.");
+
+            if (member.Coefficient != 0)
+                _members.Add(member);
         }
 
         /// <summary>
@@ -80,8 +76,10 @@ namespace PolynomialObject
         /// <exception cref="PolynomialArgumentException">Throws when member to add with such degree already exist in polynomial</exception>
         public void AddMember((double degree, double coefficient) member)
         {
-            //todo
-            throw new NotImplementedException();
+            if (ContainsMember(member.degree))
+                throw new PolynomialArgumentException("Member cant be added. Degree already exist in polynomial.");
+
+            AddMember(new PolynomialMember(member.degree, member.coefficient));
         }
 
         /// <summary>
@@ -91,8 +89,7 @@ namespace PolynomialObject
         /// <returns>True if member has been deleted</returns>
         public bool RemoveMember(double degree)
         {
-            //todo
-            throw  new NotImplementedException();
+            return _members.Remove(Find(degree));
         }
 
         /// <summary>
@@ -102,8 +99,7 @@ namespace PolynomialObject
         /// <returns>True if polynomial contains member</returns>
         public bool ContainsMember(double degree)
         {
-            //todo
-            throw new NotImplementedException();
+            return _members.Any(m => m.Degree.Equals(degree));
         }
 
         /// <summary>
@@ -113,8 +109,7 @@ namespace PolynomialObject
         /// <returns>Returns the found member or null</returns>
         public PolynomialMember Find(double degree)
         {
-            //todo
-            throw new NotImplementedException();
+            return _members.FirstOrDefault(m => m.Degree.Equals(degree));
         }
 
         /// <summary>
@@ -125,15 +120,19 @@ namespace PolynomialObject
         /// <returns>Coefficient of found member</returns>
         public double this[double degree]
         {
-            get
+            get => Find(degree)?.Coefficient ?? 0;
+            set
             {
-                //todo
-                throw new NotImplementedException();
-            }
-            set 
-            { 
-                //todo
-                throw new NotImplementedException();
+                var member = Find(degree);
+                if (value != 0)
+                {
+                    if (member is null)
+                        AddMember(new PolynomialMember(degree, value));
+                    else
+                        member.Coefficient = value;
+                }
+                else if (member != null)
+                        RemoveMember(degree);
             }
         }
 
@@ -143,8 +142,7 @@ namespace PolynomialObject
         /// <returns>Array with not null polynomial members</returns>
         public PolynomialMember[] ToArray()
         {
-            //todo
-            throw new NotImplementedException();
+            return _members.ToArray();
         }
 
         /// <summary>
@@ -156,8 +154,13 @@ namespace PolynomialObject
         /// <exception cref="PolynomialArgumentNullException">Throws if either of provided polynomials is null</exception>
         public static Polynomial operator +(Polynomial a, Polynomial b)
         {
-            //todo
-            throw new NotImplementedException();
+            if (a is null || b is null)
+                throw new PolynomialArgumentNullException("Polynomial cant be null.");
+
+            foreach (var member in b.ToArray())
+                a[member.Degree] += member.Coefficient;
+
+            return a;
         }
 
         /// <summary>
@@ -169,8 +172,13 @@ namespace PolynomialObject
         /// <exception cref="PolynomialArgumentNullException">Throws if either of provided polynomials is null</exception>
         public static Polynomial operator -(Polynomial a, Polynomial b)
         {
-            //todo
-            throw new NotImplementedException();
+            if (a is null || b is null)
+                throw new PolynomialArgumentNullException("Polynomial cant be null.");
+
+            foreach (var member in b.ToArray())
+                a[member.Degree] -= member.Coefficient;
+
+            return a;
         }
 
         /// <summary>
@@ -182,8 +190,27 @@ namespace PolynomialObject
         /// <exception cref="PolynomialArgumentNullException">Throws if either of provided polynomials is null</exception>
         public static Polynomial operator *(Polynomial a, Polynomial b)
         {
-            //todo
-            throw new NotImplementedException();
+            if (a is null || b is null)
+                throw new PolynomialArgumentNullException("Polynomial cant be null.");
+
+            var result = new Polynomial();
+
+            foreach (var memberA in a._members)
+            {
+                foreach (var memberB in b._members)
+                {
+                    var newDegree = memberA.Degree + memberB.Degree;
+                    var newCoefficient = memberA.Coefficient * memberB.Coefficient;
+
+                    if (result.ContainsMember(newDegree))
+                        result[newDegree] += newCoefficient;
+                    else
+                        result.AddMember(new PolynomialMember(newDegree, newCoefficient));
+
+                }
+            }
+            
+            return result;
         }
 
         /// <summary>
@@ -194,8 +221,7 @@ namespace PolynomialObject
         /// <exception cref="PolynomialArgumentNullException">Throws if provided polynomial is null</exception>
         public Polynomial Add(Polynomial polynomial)
         {
-            //todo
-            throw new NotImplementedException();
+            return this + polynomial;
         }
 
         /// <summary>
@@ -206,8 +232,7 @@ namespace PolynomialObject
         /// <exception cref="PolynomialArgumentNullException">Throws if provided polynomial is null</exception>
         public Polynomial Subtraction(Polynomial polynomial)
         {
-            //todo
-            throw new NotImplementedException();
+            return this - polynomial;
         }
 
         /// <summary>
@@ -218,8 +243,7 @@ namespace PolynomialObject
         /// <exception cref="PolynomialArgumentNullException">Throws if provided polynomial is null</exception>
         public Polynomial Multiply(Polynomial polynomial)
         {
-            //todo
-            throw new NotImplementedException();
+            return this * polynomial;
         }
 
         /// <summary>
@@ -230,8 +254,7 @@ namespace PolynomialObject
         /// <returns>Returns new polynomial after adding</returns>
         public static Polynomial operator +(Polynomial a, (double degree, double coefficient) b)
         {
-            //todo
-            throw new NotImplementedException();
+            return a + new Polynomial(b);
         }
 
         /// <summary>
@@ -242,8 +265,7 @@ namespace PolynomialObject
         /// <returns>Returns new polynomial after subtraction</returns>
         public static Polynomial operator -(Polynomial a, (double degree, double coefficient) b)
         {
-            //todo
-            throw new NotImplementedException();
+            return a - new Polynomial(b);
         }
 
         /// <summary>
@@ -254,8 +276,7 @@ namespace PolynomialObject
         /// <returns>Returns new polynomial after multiplication</returns>
         public static Polynomial operator *(Polynomial a, (double degree, double coefficient) b)
         {
-            //todo
-            throw new NotImplementedException();
+            return a * new Polynomial(b);
         }
 
         /// <summary>
@@ -265,8 +286,7 @@ namespace PolynomialObject
         /// <returns>Returns new polynomial after adding</returns>
         public Polynomial Add((double degree, double coefficient) member)
         {
-            //todo
-            throw new NotImplementedException();
+            return this + new Polynomial(member);
         }
 
         /// <summary>
@@ -276,8 +296,7 @@ namespace PolynomialObject
         /// <returns>Returns new polynomial after subtraction</returns>
         public Polynomial Subtraction((double degree, double coefficient) member)
         {
-            //todo
-            throw new NotImplementedException();
+            return this - new Polynomial(member);
         }
 
         /// <summary>
@@ -287,8 +306,7 @@ namespace PolynomialObject
         /// <returns>Returns new polynomial after multiplication</returns>
         public Polynomial Multiply((double degree, double coefficient) member)
         {
-            //todo
-            throw new NotImplementedException();
+            return this * new Polynomial(member);
         }
     }
 }

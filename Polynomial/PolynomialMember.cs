@@ -9,14 +9,13 @@ namespace PolynomialObject
 
         public PolynomialMember(double degree, double coefficient)
         {
-            //todo
-            throw new NotImplementedException();
+            Degree = degree;
+            Coefficient = coefficient;
         }
 
         public object Clone()
         {
-            //todo
-            throw new NotImplementedException();
+            return new PolynomialMember(Degree, Coefficient);
         }
     }
 }
